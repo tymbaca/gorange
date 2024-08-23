@@ -1,0 +1,89 @@
+version: 3
+
+includes:
+  local: 
+    # Этот файл можно создать локально, для кастомных команд, 
+    # чтобы не аффектить общий Taskfile
+    taskfile: ./Taskfile.dist.yml 
+    optional: true
+
+# Вызываются в обратном порядке, переменные в первом файле перетрут конфликтующие переменные из второго
+dotenv: [ .env, infra.env ]
+
+vars:
+  LOCAL_BIN: 
+    sh: echo '$(realpath)/bin'
+  GOLANGCI_BIN: '{{.LOCAL_BIN}}/golangci-lint'
+  MIGRATIONS_DIR: ./migrations
+
+tasks:
+  run:
+    cmds:
+      - go run ./cmd/run
+
+  # Тесты
+  test: go test ./...
+  test:cover:
+    - go test -short -count=1 -race -coverprofile=coverage.out ./...
+    - go tool cover -html=coverage.out
+    - rm coverage.out
+
+  lint: '{{.GOLANGCI_BIN}} run --config=.golangci.yml ./...'
+  arch-lint: '{{.LOCAL_BIN}}/go-arch-lint check'
+
+  # Генерация контрактов
+  generate:full:
+    # - PATH=$(LOCAL_BIN):$$PATH buf mod update
+    - cp buf.lock ./api
+    - PATH={{.LOCAL_BIN}}:$PATH buf generate
+    - rm ./api/buf.lock
+    # - PATH={{.LOCAL_BIN}}:$PATH go-swagger-merger -o ./internal/docs/old.swagger.json -t tarifficator -v v1 $(realpath -s {{.SWAGGER_SOURCES}})
+    # - rm -rf ./pkg/sync
+    # - spine generate proto
+
+
+  generate:go: 'PATH={{.LOCAL_BIN}}:$PATH go generate ./internal/...'
+  generate:mocks: 
+    - task: generate:go
+
+  # Запуск локального окружения
+  infra:start: docker-compose --env-file infra.env up -d
+
+  # Остановка локального окружения
+  infra:stop: docker-compose --env-file infra.env stop
+
+  # Миграции
+  migration:
+    silent: true
+    cmds: 
+      - 'mkdir -p {{.MIGRATIONS_DIR}}'
+      - 'echo -n "Migration name: " && read migration_name && {{.LOCAL_BIN}}/goose -dir {{.MIGRATIONS_DIR}} create $migration_name sql'
+
+  migration:up:
+    silent: true
+    cmd: '{{.LOCAL_BIN}}/goose -allow-missing -dir {{.MIGRATIONS_DIR}} postgres "host=$POSTGRES_HOST port=$POSTGRES_PORT user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB sslmode=disable" up'
+
+  migration:down:
+    silent: true
+    prompt: "Are you sure? This may lead to data loss. ({{.POSTGRES_HOST}})" 
+    cmd: '{{.LOCAL_BIN}}/goose -allow-missing -dir {{.MIGRATIONS_DIR}} postgres "host=$POSTGRES_HOST port=$POSTGRES_PORT user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB sslmode=disable" down'
+
+  migration:status:
+    silent: true
+    cmd: '{{.LOCAL_BIN}}/goose -allow-missing -dir {{.MIGRATIONS_DIR}} postgres "host=$POSTGRES_HOST port=$POSTGRES_PORT user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB sslmode=disable" status'
+
+  # Установка инструментов
+  bin-deps:
+    - GOBIN={{.LOCAL_BIN}} go install github.com/vektra/mockery/v2@v2.40.1
+    - GOBIN={{.LOCAL_BIN}} go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.1
+    - GOBIN={{.LOCAL_BIN}} go install github.com/pressly/goose/v3/cmd/goose@v3.18.0
+    - GOBIN={{.LOCAL_BIN}} go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.19.1
+    - GOBIN={{.LOCAL_BIN}} go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.19.1
+    - GOBIN={{.LOCAL_BIN}} go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.32.0
+    - GOBIN={{.LOCAL_BIN}} go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+    - GOBIN={{.LOCAL_BIN}} go install github.com/bufbuild/buf/cmd/buf@v1.29.0
+    - GOBIN={{.LOCAL_BIN}} go install gitlab.wildberries.ru/logisticcloud/platform/lib/go-swagger-merger@v0.1.4
+    - GOBIN={{.LOCAL_BIN}} go install github.com/fe3dback/go-arch-lint@v1.11.4
+
+  echo:swagger: echo {{.SWAGGER_SOURCES}}
+
