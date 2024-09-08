@@ -1,24 +1,34 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"time"
 )
 
-var s = []int{
-	10: 10,
-	11,
-	12,
-	5: 5,
-	7: 7,
-	8,
+type Event struct {
+	Val int
+	time.Time
+}
+
+func WithCallback(ctx context.Context, callback func()) context.Context {
+	go func() {
+		select {
+		case <-ctx.Done():
+			callback()
+		}
+	}()
+	return ctx
 }
 
 func main() {
-	for i, val := range s {
-		if val == 0 {
-			fmt.Println(i, "ZERO")
-		} else {
-			fmt.Println(i, val)
-		}
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	start := time.Now()
+	ctx = WithCallback(ctx, func() {
+		fmt.Printf("callback called: time since start: %s\n", time.Since(start).String())
+	})
+
+	time.Sleep(4 * time.Second)
+	fmt.Printf("exiting: time since start: %s\n", time.Since(start).String())
 }

@@ -8,8 +8,7 @@ require (
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/markelog/monkey v1.1.2
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.7.0
 )
 
 require (
@@ -28,5 +27,5 @@ require (
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 )

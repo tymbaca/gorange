@@ -40,7 +40,7 @@ func main() {
 		cache.WithPrealloc(N),
 	)
 
-	client := &Client{
+	client := &Client[string, string]{
 		cache: cache,
 	}
 	go client.updateLatency()
@@ -50,7 +50,7 @@ func main() {
 		g.Go(client.runGetter(id))
 	}
 
-	http.HandleFunc("/cache/stats", func(w http.ResponseWriter, r *http.Request) {
+        http.HandleFunc("/cache/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(cache.Stats()))
 	})
 	http.HandleFunc("/client/stats", func(w http.ResponseWriter, r *http.Request) {

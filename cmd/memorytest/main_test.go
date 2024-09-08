@@ -5,24 +5,31 @@ import (
 	// . "github.com/qrdl/testaroli"
 )
 
-type Human struct {
-	Name   string
-	Age    int
-	Credit int
-	_align [512]byte
-}
+// type Human struct {
+// 	Name   string
+// 	Age    int
+// 	Credit int
+// 	_align [512]byte
+// }
 
 // func Benchmark_Map_vs_Slice(b *testing.B) {
 // 	n := 10_000_000
-// 	m := make(map[string]Human, n)
-// 	for i := range n {
-// 		name := fake.FullName()
-// 		m[name] = Human{
-// 			Name:   name,
-// 			Age:    i,
-// 			Credit: i * 10,
-// 		}
-// 	}
+// 	// m := make(map[string]Human, n)
+// 	// for i := range n {
+// 	// 	name := fake.FullName()
+// 	// 	m[name] = Human{
+// 	// 		Name:   name,
+// 	// 		Age:    i,
+// 	// 		Credit: i * 10,
+// 	// 	}
+// 	// }
+// 	// b.Run("map", func(b *testing.B) {
+// 	// 	for range b.N {
+// 	// 		for range m {
+// 	// 		}
+// 	// 	}
+// 	// })
+
 // 	s := make([]Human, n)
 // 	for i := range n {
 // 		s[i] = Human{
@@ -32,14 +39,7 @@ type Human struct {
 // 		}
 // 	}
 
-// 	b.Run("map", func(b *testing.B) {
-// 		for range b.N {
-// 			for range m {
-// 			}
-// 		}
-// 	})
-
-// 	b.Run("slice", func(b *testing.B) {
+// 	b.Run("slice:value", func(b *testing.B) {
 // 		for range b.N {
 // 			for range s {
 // 			}
