@@ -5,10 +5,12 @@ go 1.22.1
 require (
 	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/charmbracelet/log v0.4.0
-	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733
+	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	golang.org/x/sync v0.7.0
+	google.golang.org/grpc v1.66.0
 )
 
 require (
@@ -24,8 +26,11 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
-	golang.org/x/sys v0.19.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
+	google.golang.org/protobuf v1.34.1 // indirect
 )
