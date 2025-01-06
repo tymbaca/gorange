@@ -2,7 +2,6 @@ package main
 
 import (
 	"math/rand/v2"
-	"net/http"
 	"testing"
 	"time"
 )
@@ -34,7 +33,6 @@ type Human struct {
 
 func Benchmark_Map_vs_Slice(b *testing.B) {
 	n := 100_000
-	http.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {})
 
 	b.Run("slice:value", func(b *testing.B) {
 		for range b.N {

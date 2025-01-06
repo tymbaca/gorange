@@ -1,18 +1,16 @@
-package main
+package test
 
 import "fmt"
 
+type Hash [32]byte
+
 func main() {
-	i, err := f()
-	fmt.Println(&i, &err)
+	h1 := Hash{}
+	h2 := Hash{}
 
-	a, err := f()
-	fmt.Println(&a, &err)
-
-	a, err = f()
-	fmt.Println(&a, &err)
+	fmt.Println(h1 == h2)
 }
 
-func f() (int, error) {
-	return 129, nil
+func sum(a, b int) int {
+	return a + b
 }

@@ -86,6 +86,7 @@ func randDur(min, max time.Duration) time.Duration {
 func (c *Cache[K, V]) MGet(keys []K) ([]*V, error) {
 	return c.db.MGet(keys)
 }
+
 func (c *Cache[K, V]) Keys() ([]K, error) {
 	return c.db.Keys()
 }
