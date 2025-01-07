@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 )
 
 const _tag = "bin"
@@ -29,10 +30,10 @@ func (d *decoder) Decode(obj any, order binary.ByteOrder) error {
 
 	// dereference
 	val = val.Elem()
-	return decode(val, d.r, order)
+	return decode(val, d.r, order, nil)
 }
 
-func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
+func decode(val reflect.Value, from io.Reader, order binary.ByteOrder, size *int) error {
 	switch val.Kind() {
 	case reflect.Int8:
 		i, err := readInt[int8](from, order)
@@ -41,6 +42,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetInt(int64(i))
+		return nil
 
 	case reflect.Int16:
 		i, err := readInt[int16](from, order)
@@ -49,6 +51,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetInt(int64(i))
+		return nil
 
 	case reflect.Int32:
 		i, err := readInt[int32](from, order)
@@ -57,6 +60,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetInt(int64(i))
+		return nil
 
 	case reflect.Int64:
 		i, err := readInt[int64](from, order)
@@ -65,6 +69,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetInt(int64(i))
+		return nil
 
 	case reflect.Uint8:
 		i, err := readUint[uint8](from, order)
@@ -73,6 +78,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetUint(uint64(i))
+		return nil
 
 	case reflect.Uint16:
 		i, err := readUint[uint16](from, order)
@@ -81,6 +87,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetUint(uint64(i))
+		return nil
 
 	case reflect.Uint32:
 		i, err := readUint[uint32](from, order)
@@ -89,6 +96,7 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetUint(uint64(i))
+		return nil
 
 	case reflect.Uint64:
 		i, err := readUint[uint64](from, order)
@@ -97,19 +105,69 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 		}
 
 		val.SetUint(uint64(i))
+		return nil
 
 	case reflect.Slice:
-		return fmt.Errorf("not implemented: %v", val.Kind())
+		if val.Type().Elem().Kind() != reflect.Uint8 {
+			return fmt.Errorf("non-bytes slices are not supported")
+		}
+
+		if size == nil {
+			return fmt.Errorf("size of slice not specified")
+		}
+		if *size <= 0 {
+			return nil // maybe set to 0 len slice if len is 0?
+		}
+
+		buf := make([]byte, *size)
+		_, err := io.ReadFull(from, buf)
+		if err != nil {
+			return fmt.Errorf("can't decode a slice: %w", err)
+		}
+
+		val.SetBytes(buf)
+		return nil
 
 	case reflect.String:
-		return fmt.Errorf("not implemented: %v", val.Kind())
+		// todo avoid code duplication
+		if size == nil {
+			return fmt.Errorf("size of slice not specified")
+		}
+		if *size <= 0 {
+			return nil // maybe set to 0 len slice if len is 0?
+		}
+
+		buf := make([]byte, *size)
+		_, err := io.ReadFull(from, buf)
+		if err != nil {
+			return fmt.Errorf("can't decode a slice: %w", err)
+		}
+
+		val.SetString(string(buf))
+		return nil
 
 	case reflect.Struct:
+		// lengths of arbitary-sized fields, specified by tags
+		lens := make(map[string]int)
+
 		for i := range val.NumField() {
 			fieldVal := val.Field(i)
-			err := decode(fieldVal, from, order)
+			fieldInfo := val.Type().Field(i)
+			fieldTag := fieldInfo.Tag.Get(_tag)
+
+			var err error
+			if size, ok := lens[fieldInfo.Name]; ok {
+				err = decode(fieldVal, from, order, &size)
+			} else {
+				err = decode(fieldVal, from, order, nil)
+			}
 			if err != nil {
 				return fmt.Errorf("can't decode %v (%v): %w", fieldVal.Kind(), fieldVal, err)
+			}
+
+			// if current field specifies the length of another field - save it into the map
+			if anotherField, size, ok := sizeOfAnotherField(fieldVal, fieldTag); ok {
+				lens[anotherField] = size
 			}
 		}
 
@@ -118,6 +176,25 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder) error {
 	}
 
 	return nil
+}
+
+func sizeOfAnotherField(val reflect.Value, tag string) (string, int, bool) {
+	var size int
+	switch {
+	case val.CanInt():
+		size = int(val.Int())
+	case val.CanUint():
+		size = int(val.Uint())
+	default:
+		return "", 0, false
+	}
+
+	targetField, ok := strings.CutPrefix(tag, "lenof:")
+	if !ok {
+		return "", 0, false
+	}
+
+	return targetField, size, true
 }
 
 func readInt[I int8 | int16 | int32 | int64](r io.Reader, order binary.ByteOrder) (I, error) {
