@@ -11,7 +11,7 @@ import (
 
 func TestEncodeDecode(t *testing.T) {
 	req := Request{
-		MessageSize: 1,
+		MessageSize: 52362,
 		Header: Header{
 			Version:       3,
 			CorrelationID: 2,
@@ -55,7 +55,7 @@ func BenchmarkEncodeDecode(b *testing.B) {
 }
 
 type Request struct {
-	MessageSize uint32 `bin:"lenofrest"`
+	MessageSize uint32
 	Header      Header
 }
 
