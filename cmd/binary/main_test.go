@@ -10,33 +10,37 @@ import (
 )
 
 func TestEncodeDecode(t *testing.T) {
-	h := Header{
-		Version:       3,
-		MessageSize:   1,
-		CorrelationID: 2,
-		// Body: []byte("hello"),
-		// Msg: "world",
+	req := Request{
+		MessageSize: 1,
+		Header: Header{
+			Version:       3,
+			CorrelationID: 2,
+			// Body: []byte("hello"),
+			// Msg: "world",
+		},
 	}
 
 	buf := bytes.NewBuffer(nil)
-
-	require.Nil(t, NewEncoder(buf).Encode(h, binary.BigEndian))
+	require.Nil(t, NewEncoder(buf).Encode(req, binary.BigEndian))
 
 	fmt.Println(buf.Bytes())
 
-	var hDecode Header
-	require.NotNil(t, NewDecoder(buf).Decode(hDecode, binary.BigEndian)) // not pointer
+	var reqDecoded Request
+	require.NotNil(t, NewDecoder(buf).Decode(reqDecoded, binary.BigEndian)) // not pointer
+	require.Nil(t, NewDecoder(buf).Decode(&reqDecoded, binary.BigEndian))
 
-	require.Nil(t, NewDecoder(buf).Decode(&hDecode, binary.BigEndian))
+	require.Equal(t, req, reqDecoded)
+}
 
-	require.Equal(t, h, hDecode)
+type Request struct {
+	MessageSize uint32 `bin:"lenofrest"`
+	Header      Header
 }
 
 type Header struct {
 	Version       byte
-	MessageSize   uint32 `bin:"lenofall"`
 	CorrelationID int32
 	BodySize      uint32 `bin:"lenof:Body"`
-	Body          []byte
-	Msg           string
+	// Body          []byte
+	// Msg           string
 }
