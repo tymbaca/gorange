@@ -4,10 +4,30 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
+
+func Test_shit(t *testing.T) {
+	c := &Custom{
+		Price:  124.5,
+		Active: true,
+	}
+
+	val := reflect.ValueOf(c)
+	cAny := val.Interface()
+
+	cc, ok := cAny.(Marshaler)
+	_, _ = cc, ok
+
+	switch cAny.(type) {
+	case Marshaler:
+		fmt.Println("hello")
+	}
+}
 
 func TestEncodeDecode(t *testing.T) {
 	req := Request{
@@ -18,6 +38,10 @@ func TestEncodeDecode(t *testing.T) {
 			ClientID:      String{Len: 5, Data: "hello"},
 			ShitSize:      10,
 			Shit:          []byte("1234567890"),
+		},
+		Custom: Custom{
+			Price:  124.5,
+			Active: true,
 		},
 	}
 
@@ -43,6 +67,10 @@ func BenchmarkEncodeDecode(b *testing.B) {
 			ShitSize:      10,
 			Shit:          []byte("1234567890"),
 		},
+		Custom: Custom{
+			Price:  124.5,
+			Active: true,
+		},
 	}
 
 	buf := bytes.NewBuffer(nil)
@@ -57,6 +85,7 @@ func BenchmarkEncodeDecode(b *testing.B) {
 type Request struct {
 	MessageSize uint32
 	Header      Header
+	Custom      Custom
 }
 
 type Header struct {
@@ -70,4 +99,33 @@ type Header struct {
 type String struct {
 	Len  int32 `bin:"lenof:Data"`
 	Data string
+}
+
+type Custom struct {
+	Price  float64
+	Active bool
+}
+
+func (c *Custom) MarshalBinary(w io.Writer, order binary.ByteOrder) error {
+	if err := binary.Write(w, order, c.Price); err != nil {
+		return err
+	}
+
+	if err := binary.Write(w, order, c.Active); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Custom) UnmarshalBinary(r io.Reader, order binary.ByteOrder) error {
+	if err := binary.Read(r, order, &c.Price); err != nil {
+		return err
+	}
+
+	if err := binary.Read(r, order, &c.Active); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -20,89 +20,88 @@ func Marshal(data any, order binary.ByteOrder) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-type encoder struct {
+type Encoder struct {
 	w io.Writer
 }
 
-func NewEncoder(w io.Writer) *encoder {
-	return &encoder{w: w}
+func NewEncoder(w io.Writer) *Encoder {
+	return &Encoder{w: w}
 }
 
-func (e *encoder) Encode(data any, order binary.ByteOrder) error {
+func (e *Encoder) Encode(data any, order binary.ByteOrder) error {
 	val := reflect.ValueOf(data)
 
 	return encode(val, e.w, order)
 }
 
-func encode(val reflect.Value, to io.Writer, order binary.ByteOrder) error {
-	buf := bytes.NewBuffer(nil)
-	buf.Grow(int(val.Type().Size()))
+func encode(val reflect.Value, into io.Writer, order binary.ByteOrder) error {
+	// try to use custom marshaler
+	if e, ok := val.Interface().(Marshaler); ok {
+		return e.MarshalBinary(into, order)
+	}
 
 	switch val.Kind() {
 	case reflect.Int8:
-		writeInt[int8](buf, order, val)
+		return writeInt[int8](into, order, val)
 
 	case reflect.Int16:
-		writeInt[int16](buf, order, val)
+		return writeInt[int16](into, order, val)
 
 	case reflect.Int32:
-		writeInt[int32](buf, order, val)
+		return writeInt[int32](into, order, val)
 
 	case reflect.Int64:
-		writeInt[int64](buf, order, val)
+		return writeInt[int64](into, order, val)
 
 	case reflect.Uint8:
-		writeUint[uint8](buf, order, val)
+		return writeUint[uint8](into, order, val)
 
 	case reflect.Uint16:
-		writeUint[uint16](buf, order, val)
+		return writeUint[uint16](into, order, val)
 
 	case reflect.Uint32:
-		writeUint[uint32](buf, order, val)
+		return writeUint[uint32](into, order, val)
 
 	case reflect.Uint64:
-		writeUint[uint64](buf, order, val)
+		return writeUint[uint64](into, order, val)
+
+		// todo float
 
 	case reflect.Slice:
 		elemKind := val.Type().Elem().Kind()
 		if elemKind == reflect.Uint8 {
-			buf.Write(val.Bytes())
+			_, err := into.Write(val.Bytes())
+			return err
 		}
 
 	case reflect.String:
-		buf.Write([]byte(val.String()))
+		_, err := into.Write([]byte(val.String()))
+		return err
 
 	case reflect.Struct:
 		for i := range val.NumField() {
 			fieldVal := val.Field(i)
-			err := encode(fieldVal, to, order)
+			err := encode(fieldVal, into, order)
 			if err != nil {
 				return fmt.Errorf("can't encode %v (%v): %w", fieldVal.Kind(), fieldVal, err)
 			}
 		}
 
-	default:
-		fmt.Println("ignoring field:", val)
-	}
+		return nil
 
-	_, err := io.Copy(to, buf)
-	if err != nil {
-		return fmt.Errorf("can't encode the struct: %w", err)
+	default:
+		fmt.Println("ignoring field:", val) // TODO: remove
 	}
 
 	return nil
 }
 
-func writeInt[I int8 | int16 | int32 | int64](buf *bytes.Buffer, order binary.ByteOrder, val reflect.Value) {
+func writeInt[I int8 | int16 | int32 | int64](into io.Writer, order binary.ByteOrder, val reflect.Value) error {
 	i := I(val.Int())
-	if err := binary.Write(buf, order, i); err != nil {
-		panic(err) // TODO:
-	}
+	return binary.Write(into, order, i)
 }
 
-func writeUint[U uint8 | uint16 | uint32 | uint64](buf *bytes.Buffer, order binary.ByteOrder, val reflect.Value) {
+func writeUint[U uint8 | uint16 | uint32 | uint64](into io.Writer, order binary.ByteOrder, val reflect.Value) error {
 	u := U(val.Uint())
-	if err := binary.Write(buf, order, u); err != nil {
-		panic(err)
-	}
+	return binary.Write(into, order, u)
 }

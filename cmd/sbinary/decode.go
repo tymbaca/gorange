@@ -10,15 +10,15 @@ import (
 
 const _tag = "bin"
 
-type decoder struct {
+type Decoder struct {
 	r io.Reader
 }
 
-func NewDecoder(r io.Reader) *decoder {
-	return &decoder{r: r}
+func NewDecoder(r io.Reader) *Decoder {
+	return &Decoder{r: r}
 }
 
-func (d *decoder) Decode(obj any, order binary.ByteOrder) error {
+func (d *Decoder) Decode(obj any, order binary.ByteOrder) error {
 	val := reflect.ValueOf(obj)
 	if val.Kind() != reflect.Pointer {
 		return fmt.Errorf("obj must be a pointer, got: %v", val.Kind())
@@ -34,6 +34,11 @@ func (d *decoder) Decode(obj any, order binary.ByteOrder) error {
 }
 
 func decode(val reflect.Value, from io.Reader, order binary.ByteOrder, size *int) error {
+	// try to use custom unmarshaler
+	if e, ok := val.Interface().(Unmarshaler); ok {
+		return e.UnmarshalBinary(from, order)
+	}
+
 	switch val.Kind() {
 	case reflect.Int8:
 		i, err := readInt[int8](from, order)
@@ -106,6 +111,8 @@ func decode(val reflect.Value, from io.Reader, order binary.ByteOrder, size *int
 
 		val.SetUint(uint64(i))
 		return nil
+
+		// todo float
 
 	case reflect.Slice:
 		if val.Type().Elem().Kind() != reflect.Uint8 {
