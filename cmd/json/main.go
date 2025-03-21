@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
+	"gorm.io/datatypes"
 )
 
 type OzonAuth struct {
@@ -34,6 +36,10 @@ type Offer struct {
 }
 
 func main() {
+	data := `["fsdfsd", "beasfa"]`
+	msg := datatypes.JSON(json.RawMessage(data))
+	fmt.Printf("msg.String(): %s\n", msg.String())
+
 	// var ozonAuth OzonAuth
 	// json.Unmarshal([]byte(`{
 	//                 "some-shit": "tymbaca",
@@ -55,13 +61,13 @@ func main() {
 	// 	},
 	// }
 
-	data, err := json.MarshalIndent(Outlet{
-		ID:     10,
-		Offers: []Offer{},
-	}, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(string(data))
+	// data, err := json.MarshalIndent(Outlet{
+	// 	ID:     10,
+	// 	Offers: []Offer{},
+	// }, "", "  ")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	//
+	// fmt.Println(string(data))
 }

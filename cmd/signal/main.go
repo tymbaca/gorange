@@ -6,12 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
-	"gitlab.wildberries.ru/logisticcloud/platform/lib/logger"
 )
 
 func main() {
-	logger.Init("local")
+	// logger.Init("local")
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -21,7 +19,7 @@ func main() {
 	go func() {
 		err := work(ctx)
 		if err != nil {
-			logger.Error(err, "worker")
+			// logger.Error(err, "worker")
 		}
 	}()
 
@@ -45,17 +43,17 @@ func work(ctx context.Context) error {
 }
 
 func doSomeWork(ctx context.Context) error {
-	for i := range 20 {
+	for range 20 {
 		time.Sleep(100 * time.Millisecond)
 
 		// Якобы делаем сетевой вызов
 		if err := ctx.Err(); err != nil {
-			logger.Infof("%d\t | shit, you broke the request with your shutdown", i+1)
+			// logger.Infof("%d\t | shit, you broke the request with your shutdown", i+1)
 
 			return err
 		}
 
-		logger.Infof("%d\t | successful request", i+1)
+		// logger.Infof("%d\t | successful request", i+1)
 	}
 
 	return nil
