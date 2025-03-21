@@ -1,14 +1,25 @@
-package test
+package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Hash [32]byte
 
 func main() {
-	h1 := Hash{}
-	h2 := Hash{}
+	i := 0
+	for {
+		time.Sleep(1 * time.Second)
+		i++
+		fmt.Print("\033[H\033[2J")
+		fmt.Println(i)
+	}
 
-	fmt.Println(h1 == h2)
+	// h1 := Hash{}
+	// h2 := Hash{}
+	//
+	// fmt.Println(h1 == h2)
 }
 
 func sum(a, b int) int {

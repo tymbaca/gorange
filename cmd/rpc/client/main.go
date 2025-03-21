@@ -15,7 +15,7 @@ func main() {
 	defer client.Close()
 
 	var reply server.Quotient
-	err = client.Call("Arith.Divide", &server.Args{A: 8, B: 2}, &reply)
+	err = client.Call("Arith.Divide", &server.Args{A: 8, B: 0}, &reply)
 	if err != nil {
 		panic(err)
 	}

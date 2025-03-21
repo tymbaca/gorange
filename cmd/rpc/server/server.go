@@ -1,8 +1,6 @@
 package server
 
-import (
-	"errors"
-)
+import "errors"
 
 type Args struct {
 	A, B int
