@@ -23,19 +23,20 @@ type record struct {
 	Deadline time.Time
 }
 
-func (c *Cache) Prolong(key string, ttl time.Duration) {
+func (c *Cache) Prolong(key string, ttl time.Duration) (string, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	record, ok := c.data[key]
 	if !ok {
-		return
+		return "", false
 	}
 
 	record.Deadline = time.Now().Add(ttl)
 	c.data[key] = record
 
-	log.Print("prolong:", key, "by", ttl)
+	log.Print("prolong", "key", key, "by", ttl)
+	return record.Val, true
 }
 
 func (c *Cache) SetNX(key, val string, ttl time.Duration) (string, bool) {

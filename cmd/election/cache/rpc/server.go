@@ -13,7 +13,9 @@ type Server struct {
 }
 
 func (c *Server) Prolong(req *ProlongReq, resp *ProlongResp) error {
-	c.c.Prolong(req.Key, req.TTL)
+	current, ok := c.c.Prolong(req.Key, req.TTL)
+	resp.Current = current
+	resp.Set = ok
 
 	return nil
 }

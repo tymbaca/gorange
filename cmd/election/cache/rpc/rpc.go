@@ -10,7 +10,10 @@ type ProlongReq struct {
 	TTL time.Duration
 }
 
-type ProlongResp struct{}
+type ProlongResp struct {
+	Current string
+	Set     bool
+}
 
 type SetNXReq struct {
 	Key, Val string
@@ -35,15 +38,15 @@ func Connect(addr string) *Client {
 	return &Client{c: c}
 }
 
-func (c *Client) Prolong(key string, ttl time.Duration) error {
+func (c *Client) Prolong(key string, ttl time.Duration) (string, bool, error) {
 	req := ProlongReq{Key: key, TTL: ttl}
 	var resp ProlongResp
 	err := c.c.Call("Server.Prolong", &req, &resp)
 	if err != nil {
-		return err
+		return "", false, err
 	}
 
-	return nil
+	return resp.Current, resp.Set, nil
 }
 
 func (c *Client) SetNX(key, val string, ttl time.Duration) (string, bool, error) {
