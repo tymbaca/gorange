@@ -50,8 +50,6 @@ func (c *Cache) SetNX(key, val string, ttl time.Duration) (string, bool) {
 	}
 
 	if current.Deadline.Before(time.Now()) {
-		log.Warn("expired", "key", key)
-
 		c.data[key] = record{Val: val, Deadline: time.Now().Add(ttl)}
 		log.Info("setnx", "key", key, "to", val, "by", ttl)
 		return val, true

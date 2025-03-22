@@ -21,10 +21,9 @@ func main() {
 	log.Print("starting", "my-id", id)
 
 	for {
-		if chance(10) {
+		if chance(0) {
 			sleep := time.Duration(rand.Intn(10000)) * time.Millisecond
 			log.Error("shotdown! crit-%^ic.. l ER0-OR...", "wake-after", sleep)
-			time.Sleep(sleep)
 
 			select {
 			case <-ctx.Done():
@@ -39,13 +38,17 @@ func main() {
 			return
 		}
 
-		time.Sleep(time.Second)
-		current, ok, err := c.SetNX("leader", id, 5*time.Second)
+		time.Sleep(time.Second + time.Duration(rand.Intn(100))*time.Millisecond)
+		current, set, err := c.SetNX("leader", id, 5*time.Second)
 		if err != nil {
 			panic(err)
 		}
 
-		log.Info("setnx", "current", current, "set", ok)
+		if set {
+			log.Info("setnx", "current", current, "set", set)
+		} else {
+			log.Print("setnx", "current", current, "set", set)
+		}
 	}
 }
 
