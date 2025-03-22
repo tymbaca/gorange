@@ -59,6 +59,8 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
+	github.com/rotisserie/eris v0.5.4
+	github.com/samber/lo v1.47.0
 	github.com/yanggao40/goftp v0.0.0-20190729080626-659e3fe6b903
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
