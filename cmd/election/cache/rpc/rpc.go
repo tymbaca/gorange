@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+type GetReq struct {
+	Key string
+}
+
+type GetResp struct {
+	Val string
+}
+
 type ProlongReq struct {
 	Key string
 	TTL time.Duration
@@ -47,6 +55,17 @@ func (c *Client) Prolong(key string, ttl time.Duration) (string, bool, error) {
 	}
 
 	return resp.Current, resp.Set, nil
+}
+
+func (c *Client) Get(key string) (string, error) {
+	req := GetReq{Key: key}
+	var resp GetResp
+	err := c.c.Call("Server.Get", &req, &resp)
+	if err != nil {
+		return "", err
+	}
+
+	return resp.Val, nil
 }
 
 func (c *Client) SetNX(key, val string, ttl time.Duration) (string, bool, error) {

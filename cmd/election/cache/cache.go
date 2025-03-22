@@ -9,7 +9,7 @@ import (
 
 type Cache struct {
 	data map[string]record
-	mu   sync.Mutex
+	mu   sync.RWMutex
 }
 
 func New() *Cache {
@@ -37,6 +37,22 @@ func (c *Cache) Prolong(key string, ttl time.Duration) (string, bool) {
 
 	log.Print("prolong", "key", key, "by", ttl)
 	return record.Val, true
+}
+
+func (c *Cache) Get(key string) (string, bool) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	record, ok := c.data[key]
+	if !ok {
+		return "", false
+	}
+
+	if record.Deadline.Before(time.Now()) {
+		return "", false
+	}
+
+	return record.Val, ok
 }
 
 func (c *Cache) SetNX(key, val string, ttl time.Duration) (string, bool) {

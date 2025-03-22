@@ -20,6 +20,13 @@ func (c *Server) Prolong(req *ProlongReq, resp *ProlongResp) error {
 	return nil
 }
 
+func (c *Server) Get(req *GetReq, resp *GetResp) error {
+	current, _ := c.c.Get(req.Key)
+	resp.Val = current
+
+	return nil
+}
+
 func (c *Server) SetNX(req *SetNXReq, resp *SetNXResp) error {
 	current, ok := c.c.SetNX(req.Key, req.Val, req.TTL)
 	resp.Current = current

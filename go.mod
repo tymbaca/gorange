@@ -1,6 +1,6 @@
 module github.com/tymbaca/gorange
 
-go 1.22.1
+go 1.22.5
 
 require (
 	github.com/brianvoe/gofakeit/v7 v7.0.4
@@ -27,6 +27,7 @@ require (
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/secsy/goftp v0.0.0-20200609142545-aa2de14babf4 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
+	github.com/tymbaca/less v0.0.1 // indirect
 	github.com/zclconf/go-cty v1.13.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
