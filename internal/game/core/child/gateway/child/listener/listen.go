@@ -4,11 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 
 	"github.com/anthdm/hollywood/actor"
 	"github.com/tymbaca/gorange/internal/game/assert"
-	gateway "github.com/tymbaca/gorange/internal/game/gateway/in"
+	gateway "github.com/tymbaca/gorange/internal/game/core/child/gateway/in"
 	"github.com/tymbaca/gorange/internal/game/model"
 	"github.com/tymbaca/sbinary"
 )
@@ -29,6 +30,9 @@ func (l *Listener) Receive(ctx *actor.Context) {
 	case actor.Started:
 		l.done = make(chan struct{})
 		go listen(ctx, l)
+
+		slog.Info("gateway/listener started", "pid", ctx.PID().String())
+
 	case actor.Stopped:
 		close(l.done)
 	}

@@ -3,18 +3,28 @@ package gateway
 import (
 	"encoding/binary"
 	"log"
+	"log/slog"
 	"net"
 
 	"github.com/anthdm/hollywood/actor"
-	"github.com/tymbaca/gorange/internal/game/gateway/child/listener"
-	gateway "github.com/tymbaca/gorange/internal/game/gateway/model"
-	player "github.com/tymbaca/gorange/internal/game/player/in"
+	"github.com/tymbaca/gorange/internal/game/core/child/gateway/child/listener"
+	gateway "github.com/tymbaca/gorange/internal/game/core/child/gateway/model"
+	player "github.com/tymbaca/gorange/internal/game/core/child/player/in"
 	"github.com/tymbaca/sbinary"
 )
 
-type Gateway struct {
-	core *actor.PID
+func New(addr string) actor.Producer {
+	return func() actor.Receiver {
+		return &Gateway{
+			addr:    addr,
+			pidMap:  make(map[string]*actor.PID),
+			peerMap: make(map[string]net.Conn),
+		}
+	}
+}
 
+type Gateway struct {
+	addr    string
 	pidMap  map[string]*actor.PID
 	peerMap map[string]net.Conn
 }
@@ -22,7 +32,9 @@ type Gateway struct {
 func (g *Gateway) Receive(ctx *actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case actor.Started:
-		ctx.SpawnChild(listener.New(":8080"), "listener")
+		ctx.SpawnChild(listener.New(g.addr), "listener")
+
+		slog.Info("gateway started", "pid", ctx.PID().String())
 
 	case gateway.InMsg:
 		pid, ok := g.pidMap[msg.From]
@@ -45,7 +57,8 @@ func (g *Gateway) Receive(ctx *actor.Context) {
 
 	case gateway.ConnectMsg:
 		g.peerMap[msg.ID] = msg.Conn
-		g.pidMap
+		// TODO:
+		// g.pidMap
 
 	case gateway.DisconnectMsg:
 		delete(g.peerMap, msg.ID)

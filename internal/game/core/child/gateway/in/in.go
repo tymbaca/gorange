@@ -4,7 +4,7 @@ import (
 	"net"
 
 	"github.com/anthdm/hollywood/actor"
-	gateway "github.com/tymbaca/gorange/internal/game/gateway/model"
+	gateway "github.com/tymbaca/gorange/internal/game/core/child/gateway/model"
 	"github.com/tymbaca/gorange/internal/game/model"
 )
 

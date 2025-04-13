@@ -2,8 +2,8 @@ package player
 
 import (
 	"github.com/anthdm/hollywood/actor"
+	player "github.com/tymbaca/gorange/internal/game/core/child/player/model"
 	"github.com/tymbaca/gorange/internal/game/model"
-	player "github.com/tymbaca/gorange/internal/game/player/model"
 )
 
 func SendIn(ctx *actor.Context, pid *actor.PID, pack model.Packet) {
