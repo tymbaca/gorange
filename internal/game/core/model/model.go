@@ -7,3 +7,7 @@ import (
 type BroadcastMsg struct {
 	Pack model.Packet
 }
+
+type SpawnPlayerMsg struct {
+	ID string
+}

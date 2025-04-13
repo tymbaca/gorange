@@ -14,6 +14,8 @@ func (c *Core) Receive(ctx *actor.Context) {
 	switch msg := ctx.Message().(type) {
 	case core.BroadcastMsg:
 		c.broadcast(ctx, ctx.Sender(), msg)
+	case core.SpawnPlayerMsg:
+		ctx.SpawnChild()
 	}
 }
 
