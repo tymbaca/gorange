@@ -1,27 +1,28 @@
-package core
+package Core
 
 import (
 	"github.com/anthdm/hollywood/actor"
-	"github.com/tymbaca/gorange/internal/game/player"
+	core "github.com/tymbaca/gorange/internal/game/core/model"
+	player "github.com/tymbaca/gorange/internal/game/player/in"
 )
 
-type core struct {
+type Core struct {
 	players []*actor.PID
 }
 
-func (c *core) Receive(ctx *actor.Context) {
+func (c *Core) Receive(ctx *actor.Context) {
 	switch msg := ctx.Message().(type) {
-	case *broadcastMsg:
+	case core.BroadcastMsg:
 		c.broadcast(ctx, ctx.Sender(), msg)
 	}
 }
 
-func (c *core) broadcast(ctx *actor.Context, from *actor.PID, msg *broadcastMsg) {
+func (c *Core) broadcast(ctx *actor.Context, from *actor.PID, msg core.BroadcastMsg) {
 	for _, p := range c.players {
 		if p.Equals(from) {
 			continue
 		}
 
-		player.SendOut(ctx, p, msg.pack)
+		player.SendOut(ctx, p, msg.Pack)
 	}
 }

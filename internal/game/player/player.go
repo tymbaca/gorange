@@ -3,19 +3,20 @@ package player
 import (
 	"github.com/anthdm/hollywood/actor"
 	core "github.com/tymbaca/gorange/internal/game/core/in"
-	"github.com/tymbaca/gorange/internal/game/gateway"
+	gateway "github.com/tymbaca/gorange/internal/game/gateway/in"
+	player "github.com/tymbaca/gorange/internal/game/player/model"
 )
 
-type player struct {
+type Player struct {
 	core    *actor.PID
 	gateway *actor.PID
 }
 
-func (p *player) Receive(ctx *actor.Context) {
+func (p *Player) Receive(ctx *actor.Context) {
 	switch msg := ctx.Message().(type) {
-	case *inPlayerMsg:
-		core.Broadcast(ctx, p.core, msg.pack)
-	case *outPlayerMsg:
-		gateway.Send(ctx, p.gateway, ctx.PID(), msg.pack)
+	case player.InPlayerMsg:
+		core.Broadcast(ctx, p.core, msg.Pack)
+	case player.OutPlayerMsg:
+		gateway.Send(ctx, p.gateway, ctx.PID(), msg.Pack)
 	}
 }
