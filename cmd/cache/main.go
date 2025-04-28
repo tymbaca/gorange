@@ -50,14 +50,14 @@ func main() {
 		g.Go(client.runGetter(id))
 	}
 
-        http.HandleFunc("/cache/stats", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/cache/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(cache.Stats()))
 	})
 	http.HandleFunc("/client/stats", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(client.Stats()))
 	})
 	http.HandleFunc("/mem/stats", func(w http.ResponseWriter, r *http.Request) {
-		stats := mem.FormatMem(mem.KiB)
+		stats := mem.Format(mem.KiB)
 		w.Write([]byte(stats))
 	})
 	http.ListenAndServe(":8000", nil)

@@ -23,20 +23,20 @@ func (u Unit) String() string {
 	return fmt.Sprintf("Unit(%d)", u)
 }
 
-// HeapMem gets bytes of allocated heap objects
-func HeapMem() uint64 {
+// Heap gets bytes of allocated heap objects
+func Heap() uint64 {
 	mem := runtime.MemStats{}
 	runtime.ReadMemStats(&mem)
 	return mem.HeapAlloc
 }
 
-// StackMem gets bytes of stack size
-func StackMem() uint64 {
+// Stack gets bytes of stack size
+func Stack() uint64 {
 	mem := runtime.MemStats{}
 	runtime.ReadMemStats(&mem)
 	return mem.StackSys
 }
 
-func FormatMem(unit Unit) string {
-	return fmt.Sprintf("stack: %.2f %s, heap: %.2f %s", float32(StackMem())/float32(unit), unit, float32(HeapMem())/float32(unit), unit) //nolint
+func Format(unit Unit) string {
+	return fmt.Sprintf("stack: %.2f %s, heap: %.2f %s", float32(Stack())/float32(unit), unit, float32(Heap())/float32(unit), unit) //nolint
 }

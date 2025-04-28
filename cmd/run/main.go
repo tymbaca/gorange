@@ -44,7 +44,7 @@ func main() {
 		CreatedAt time.Time `db:"created_at"`
 	}
 
-	log.Info("starting killer generation", "mem", mem.FormatMem(mem.MiB))
+	log.Info("starting killer generation", "mem", mem.Format(mem.MiB))
 
 	count := 5_000_000
 	killers := make([]killer, 0, count)
@@ -57,7 +57,7 @@ func main() {
 		})
 	}
 
-	log.Infof("generated all killers, gonna copy to repo, mem: %s", mem.FormatMem(mem.MiB))
+	log.Infof("generated all killers, gonna copy to repo, mem: %s", mem.Format(mem.MiB))
 
 	_, err = pool.CopyFrom(
 		ctx,
@@ -71,8 +71,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Infof("successfully copied to repo, mem: %s", mem.FormatMem(mem.MiB))
+	log.Infof("successfully copied to repo, mem: %s", mem.Format(mem.MiB))
 
 	runtime.GC()
-	log.Infof("after GC, mem: %s", mem.FormatMem(mem.MiB))
+	log.Infof("after GC, mem: %s", mem.Format(mem.MiB))
 }

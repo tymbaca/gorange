@@ -9,9 +9,9 @@ import (
 func main() {
 	// []int{124, 33, 6, 31, 341, 63, 2}
 
-	var s []int
+	var s []*int
 	for range 1_0_000_000 {
-		s = append(s, rand.Int())
+		s = append(s, ptr(rand.Int()))
 	}
 	start := time.Now()
 	res := maxrec(s, -1)
@@ -22,23 +22,29 @@ func main() {
 	fmt.Printf("maxloop: %v, dur: %s\n", res, time.Since(start))
 }
 
-func maxrec(list []int, lastMax int) int {
+func ptr(n int) *int {
+	return &n
+}
+
+func maxrec(list []*int, lastMax int) int {
 	if len(list) == 0 {
 		return lastMax
 	}
 
 	elem := list[0]
+	// fmt.Printf("%p\n", elem)
 
-	if elem > lastMax {
-		lastMax = elem
+	if *elem > lastMax {
+		lastMax = *elem
 	}
-	return maxrec(list[1:], elem)
+	return maxrec(list[1:], lastMax)
 }
 
-func maxloop(list []int, lastMax int) int {
+func maxloop(list []*int, lastMax int) int {
 	for _, n := range list {
-		if n > lastMax {
-			lastMax = n
+		// fmt.Printf("%p\n", n)
+		if *n > lastMax {
+			lastMax = *n
 		}
 	}
 
