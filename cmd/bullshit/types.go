@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func typeBrainrot() {
 	type int32 int64
 	type any = int
 	type int any

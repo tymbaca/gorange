@@ -24,6 +24,8 @@ func NewChunkReader(file *os.File, offset, size int64) *ChunkReader {
 	}
 }
 
+// |--------|--------|--------
+
 func (cr *ChunkReader) Read(p []byte) (n int, err error) {
 	cr.mu.Lock()
 	defer cr.mu.Unlock()
